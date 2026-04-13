@@ -177,19 +177,61 @@ var pDeuses = "Gods/";
 var pMapas = "Mapas/";
 
 var GODS = {
-  zeus:{d:'Zeus',u:pDeuses+'zeus_portrait.png'},poseidon:{d:'Poseidon',u:pDeuses+'poseidon_portrait.png'},hades:{d:'Hades',u:pDeuses+'hades_portrait.png'},
-  thor:{d:'Thor',u:pDeuses+'thor_portrait.png'},odin:{d:'Odin',u:pDeuses+'odin_portrait.png'},loki:{d:'Loki',u:pDeuses+'loki_portrait.png'},freyr:{d:'Freyr',u:pDeuses+'freyr_portrait.png'},freya:{d:'Freya',u:'',alias:'freyr'},
-  ra:{d:'Ra',u:pDeuses+'ra_portrait.png'},isis:{d:'Isis',u:pDeuses+'isis_portrait.png'},set:{d:'Set',u:pDeuses+'set_portrait.png'},
-  kronos:{d:'Kronos',u:pDeuses+'kronos_portrait.png'},cronos:{d:'Cronos',u:'',alias:'kronos'},oranos:{d:'Oranos',u:pDeuses+'oranos_portrait.png'},gaia:{d:'Gaia',u:pDeuses+'gaia_portrait.png'},
-  amaterasu:{d:'Amaterasu',u:pDeuses+'amaterasu_portrait.png'},tsukuyomi:{d:'Tsukuyomi',u:pDeuses+'tsukuyomi_portrait.png'},susanoo:{d:'Susanoo',u:pDeuses+'susanoo_portrait.png'},demeter:{d:'Deméter',u:pDeuses+'demeter_portrait.png'},
-  fuxi:{d:'Fu Xi',u:pDeuses+'fuxi_portrait.png'},nuwa:{d:'Nu Wa',u:pDeuses+'nuwa_portrait.png'},shennong:{d:'Shennong',u:pDeuses+'shennong_portrait.png'}
+  zeus:{d:'Zeus',u:'https://i.ibb.co/F49NwfT9/zeus-icon.png'},
+  poseidon:{d:'Poseidon',u:'https://i.ibb.co/jvtLCW4S/poseidon-icon.png'},
+  hades:{d:'Hades',u:'https://i.ibb.co/tPwmkcCp/hades-icon.png'},
+  thor:{d:'Thor',u:'https://i.ibb.co/rGZPTwfL/thor-icon.png'},
+  odin:{d:'Odin',u:'https://i.ibb.co/95xDGLv/odin-icon.png'},
+  loki:{d:'Loki',u:'https://i.ibb.co/6RTX0Lj4/loki-icon.png'},
+  freyr:{d:'Freyr',u:'https://i.ibb.co/ynMrdFtG/freyr-icon.png'},
+  freya:{d:'Freya',u:'',alias:'freyr'},
+  ra:{d:'Ra',u:'https://i.ibb.co/JFHscCM7/ra-icon.png'},
+  isis:{d:'Isis',u:'https://i.ibb.co/j9C8bQrr/isis-icon.png'},
+  set:{d:'Set',u:'https://i.ibb.co/qMB7dP4L/set-icon.png'},
+  kronos:{d:'Kronos',u:'https://i.ibb.co/gbgpG2QW/kronos-icon.png'},
+  cronos:{d:'Cronos',u:'',alias:'kronos'},
+  oranos:{d:'Oranos',u:'https://i.ibb.co/rGtqd9hd/oranos-icon.png'},
+  gaia:{d:'Gaia',u:'https://i.ibb.co/Pv0QLMMK/gaia-icon.png'},
+  amaterasu:{d:'Amaterasu',u:'https://i.ibb.co/qYPMBSWG/amaterasu-icon.png'},
+  tsukuyomi:{d:'Tsukuyomi',u:'https://i.ibb.co/1tSCP2v4/tsukuyomi-icon.png'},
+  susanoo:{d:'Susanoo',u:'https://i.ibb.co/GQw62YpN/susanoo-icon.png'},
+  demeter:{d:'Deméter',u:'https://static.wikia.nocookie.net/ageofempires/images/7/7e/Demeter_artwork_AoMR.webp/revision/latest/scale-to-width-down/1000?cb=20260127183206'},
+  fuxi:{d:'Fu Xi',u:'https://i.ibb.co/tVSJ7WG/fuxi-icon.png'},
+  nuwa:{d:'Nu Wa',u:'https://i.ibb.co/v2xvKdw/nuwa-icon.png'},
+  shennong:{d:'Shennong',u:'https://i.ibb.co/7t3d6vZ4/shennong-icon.png'}
 };
 
-var MAP_LIST = ['Arabia','Alfheim','Midgard','Highland','Oasis','Nomad','Watering Hole','Anatolia','Ghost Lake','Marsh'];
+var MAP_LIST = ['Alfheim','Midgard','Highland','Oasis','Watering Hole','Anatolia','Ghost Lake','Marsh','Anatolia','Arena','Gold Rush','Steppe','Giza','Qinghai Lake','Blue Lagoon','Mediterranean','Mirage','Yellow River','Savannah','Tundra','Nile Shallows','Erebus'];
+// Deduplicate MAP_LIST
+MAP_LIST = MAP_LIST.filter((v,i,a) => a.indexOf(v) === i);
 var MAP_IMGS = {};
 
 function norm(s){ if(!s) return ''; s = s.replace(/^aomgods\./i, ''); return s.normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase().replace(/[^a-z]/g,''); }
 MAP_LIST.forEach(m => { var k = norm(m); MAP_IMGS[k] = pMapas + 'maps_' + k.replace(/\s+/g, '_') + '.png'; });
+
+// Override with provided map URLs
+var MAP_URL_OVERRIDES = {
+  'alfheim': 'https://static.wikia.nocookie.net/ageofempires/images/c/c4/AoMR_Alfheim_map_icon.png/revision/latest?cb=20240920074941',
+  'anatolia': 'https://static.wikia.nocookie.net/ageofempires/images/1/15/AoMR_Anatolia_map_icon.png/revision/latest?cb=20240920074942',
+  'arena': 'https://static.wikia.nocookie.net/ageofempires/images/a/a2/AoMR_Arena_map_icon.png/revision/latest?cb=20240721083223',
+  'wateringhole': 'https://static.wikia.nocookie.net/ageofempires/images/0/01/AoMR_Watering_Hole_map_icon.png/revision/latest?cb=20240920075345',
+  'goldrush': 'https://static.wikia.nocookie.net/ageofempires/images/3/3a/AoMR_Gold_Rush_map_icon.png/revision/latest?cb=20240906191715',
+  'steppe': 'https://static.wikia.nocookie.net/ageofempires/images/b/ba/AoMR_Steppe.png/revision/latest?cb=20250303105325',
+  'giza': 'https://static.wikia.nocookie.net/ageofempires/images/3/33/AoMR_Giza_map_icon.png/revision/latest?cb=20240716202124',
+  'ghostlake': 'https://static.wikia.nocookie.net/ageofempires/images/5/55/AoMR_Ghost_Lake_map_icon.png/revision/latest?cb=20240920074948',
+  'qinghailake': 'https://static.wikia.nocookie.net/ageofempires/images/8/85/AoMR_Qinghai_Lake.png/revision/latest?cb=20250303105325',
+  'bluelagoon': 'https://static.wikia.nocookie.net/ageofempires/images/4/4c/AoMR_Blue_Lagoon_map_icon.png/revision/latest?cb=20240920074945',
+  'mediterranean': 'https://static.wikia.nocookie.net/ageofempires/images/4/4e/AoMR_Mediterranean_map_icon.png/revision/latest?cb=20240920075001',
+  'mirage': 'https://static.wikia.nocookie.net/ageofempires/images/a/af/AoMR_Mirage_map_icon.png/revision/latest?cb=20240721082851',
+  'oasis': 'https://static.wikia.nocookie.net/ageofempires/images/3/30/AoMR_Oasis_map_icon.png/revision/latest?cb=20240920075325',
+  'marsh': 'https://static.wikia.nocookie.net/ageofempires/images/a/ac/AoMR_Marsh_map_icon.png/revision/latest?cb=20240920074958',
+  'yellowriver': 'https://static.wikia.nocookie.net/ageofempires/images/5/58/AoMR_Yellow_River.png/revision/latest?cb=20250303105325',
+  'savannah': 'https://static.wikia.nocookie.net/ageofempires/images/4/49/AoMR_Savannah_map_icon.png/revision/latest?cb=20240920075331',
+  'tundra': 'https://static.wikia.nocookie.net/ageofempires/images/d/d7/AoMR_Tundra_map_icon.png/revision/latest?cb=20240920075339',
+  'nileshallows': 'https://static.wikia.nocookie.net/ageofempires/images/8/82/AoMR_Nile_Shallows_map_icon.png/revision/latest?cb=20240721082844',
+  'erebus': 'https://static.wikia.nocookie.net/ageofempires/images/5/5f/AoMR_Erebus_map_icon.png/revision/latest?cb=20240920074946'
+};
+Object.keys(MAP_URL_OVERRIDES).forEach(function(k){ MAP_IMGS[k] = MAP_URL_OVERRIDES[k]; });
 
 function isGod(s){ return !!GODS[norm(s)]; }
 function getImg(s){ var k=norm(s); if(GODS[k]) return GODS[k].alias ? GODS[GODS[k].alias].u : GODS[k].u; return MAP_IMGS[k] || null; }
