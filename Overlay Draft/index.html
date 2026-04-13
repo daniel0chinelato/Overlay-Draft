@@ -2,365 +2,662 @@
 <html lang="pt-BR">
 <head>
 <meta charset="UTF-8">
-<title>AoM Draft Overlay Profissional — CAOK</title>
+<title>AoM Draft Overlay — CAOK</title>
 <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;700;900&family=Rajdhani:wght@400;600;700&display=swap" rel="stylesheet">
 <style>
-/* ═══ VARIÁVEIS DE COR E FONTES ═══ */
-:root { --host:#5aabff; --guest:#ff6b6b; --gold:#c9a84c; --gold2:#f0d080; --bg:#0c0e14; --card:#12161f; --border:rgba(255,255,255,0.3); --FT:'Cinzel',serif; --FB:'Rajdhani',sans-serif; }
+:root {
+  --host:#5aabff; --guest:#ff6b6b;
+  --gold:#c9a84c; --gold2:#f0d080;
+  --bg:#0c0e14; --card:#12161f;
+  --border:rgba(255,255,255,0.25);
+  --FT:'Cinzel',serif; --FB:'Rajdhani',sans-serif;
+}
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
 html,body{background:var(--bg);color:#e8e0d0;font-family:var(--FB);min-height:100vh;overflow-x:hidden;}
 
-/* ─── TABS & CONTROLES ─── */
-.ctrl-panel { position: relative; z-index: 100; border-bottom: 1px solid rgba(201,168,76,0.2); background: #090b10; }
-.tabs{display:flex;}
-.tab{font-family:var(--FT);font-size:12px;font-weight:700;letter-spacing:1px;text-transform:uppercase;padding:12px 20px;border:none;cursor:pointer;background:transparent;color:#4b5563;border-bottom:3px solid transparent; transition: 0.2s;}
+/* ─── PAINEL ─── */
+.ctrl-panel{position:relative;z-index:100;border-bottom:1px solid rgba(201,168,76,.2);background:#090b10;transition:max-height .5s ease;max-height:700px;overflow:hidden;}
+.ctrl-panel.minimized{max-height:45px;}
+.tabs{display:flex;align-items:center;}
+.tab{font-family:var(--FT);font-size:12px;font-weight:700;letter-spacing:1px;text-transform:uppercase;padding:12px 20px;border:none;cursor:pointer;background:transparent;color:#4b5563;border-bottom:3px solid transparent;transition:.2s;}
 .tab.on{color:var(--gold);border-bottom-color:var(--gold);}
-.tab:hover{color:#9ca3af;}
-.hide-btn { background: #374151; color: white; margin-left: auto; font-family:var(--FB); font-weight:700; font-size:11px; text-transform:uppercase; padding: 6px 12px; border:none; cursor:pointer; border-radius:4px; margin-right:10px; margin-top:5px;}
+.hide-btn{background:#374151;color:white;margin-left:auto;font-family:var(--FB);font-weight:700;font-size:11px;text-transform:uppercase;padding:6px 12px;border:none;cursor:pointer;border-radius:4px;margin-right:10px;margin-top:5px;}
+.mode-badge{display:inline-flex;align-items:center;gap:8px;margin-left:15px;font-family:var(--FT);font-size:11px;color:#555;}
+#mode-info{color:var(--gold);font-weight:700;font-size:12px;}
 
-.manual-panel { padding:15px 20px; background:#0c0e14; border-top:1px solid rgba(255,255,255,0.05); }
-.btn-load{font-family:var(--FT);font-size:11px;font-weight:900;letter-spacing:1px;text-transform:uppercase;padding:8px 16px;border-radius:4px;border:none;cursor:pointer;white-space:nowrap;background:#22c55e;color:#000; transition:0.2s;}
+.manual-panel{padding:15px 20px;background:#0c0e14;border-top:1px solid rgba(255,255,255,.05);}
+.url-row{display:flex;gap:10px;margin-bottom:8px;align-items:center;}
+.url-label{font-family:var(--FT);font-size:10px;color:var(--gold);white-space:nowrap;letter-spacing:1px;text-transform:uppercase;min-width:75px;}
+.url-input{flex:1;background:#000;color:#22c55e;border:1px solid #333;padding:6px 10px;font-family:var(--FB);font-size:12px;border-radius:3px;outline:none;}
+.json-row{display:flex;gap:15px;margin-bottom:10px;}
+.json-area{flex:1;height:70px;background:#000;color:#22c55e;border:1px solid #333;padding:8px;font-family:monospace;font-size:11px;border-radius:3px;resize:vertical;}
+.json-label{font-family:var(--FT);font-size:9px;color:#555;letter-spacing:1px;text-transform:uppercase;margin-bottom:4px;}
+.btn-load{font-family:var(--FT);font-size:11px;font-weight:900;letter-spacing:1px;text-transform:uppercase;padding:8px 18px;border-radius:4px;border:none;cursor:pointer;background:#22c55e;color:#000;}
+.btn-reset{font-family:var(--FT);font-size:11px;font-weight:900;letter-spacing:1px;text-transform:uppercase;padding:8px 18px;border-radius:4px;border:none;cursor:pointer;background:#ef4444;color:#fff;margin-left:8px;}
 
-/* ─── PAGES ─── */
-.page{display:none;}.page.on{display:block;}
+/* ─── ANIMAÇÕES ─── */
+@keyframes linearGlow{0%{border-color:rgba(201,168,76,.15)}100%{border-color:rgba(201,168,76,1);box-shadow:0 0 18px rgba(201,168,76,.5)}}
+.suspense-glow{animation:linearGlow 1s linear infinite alternate!important;border-width:2px!important;}
+@keyframes flipIn{0%{opacity:0;transform:perspective(800px) rotateY(-90deg)}100%{opacity:1;transform:perspective(800px) rotateY(0)}}
+.reveal{animation:flipIn .6s forwards;}
+.pop{animation:flipIn .5s forwards;}
+.mrev{animation:flipIn .55s forwards;}
 
-/* ═══ OVERLAY PAGE ═══ */
+/* ─── OVERLAY ─── */
 .wrap{display:flex;flex-direction:column;width:100%;padding:10px 0;}
-.hdr{display:flex;align-items:center;justify-content:center;gap:0;padding:10px 30px 5px;}
-.pblock{flex:1;display:flex;align-items:center;gap:15px;}
+
+/* HEADER */
+.hdr{display:flex;align-items:center;justify-content:center;padding:10px 30px 15px;}
+.pblock{flex:1;display:flex;align-items:center;gap:14px;}
 .pblock.R{flex-direction:row-reverse;}
 .ava{width:60px;height:60px;border-radius:50%;border:2px solid #111;background:#111;display:flex;align-items:center;justify-content:center;font-size:24px;overflow:hidden;flex-shrink:0;}
 .pblock.L .ava{border-color:var(--host);}
 .pblock.R .ava{border-color:var(--guest);}
 .ava img{width:100%;height:100%;object-fit:cover;}
 .pname{font-family:var(--FT);font-size:26px;font-weight:700;text-transform:uppercase;letter-spacing:2px;line-height:1;}
-.vsc{display:flex;flex-direction:column;align-items:center;padding:0 30px;}
-.vstx{font-family:var(--FT);font-size:24px;font-weight:900;color:#fff;}
+.vstx{font-family:var(--FT);font-size:24px;font-weight:900;color:#fff;padding:0 35px;flex-shrink:0;}
 
-.logbox{margin:10px auto; width:90%; max-width:850px; background:rgba(0,0,0,.6); border:1px solid rgba(255,255,255,.1); padding:12px 15px; height:120px; overflow-y:auto; text-align:center; border-radius: 8px;}
-.le{font-size:14px; margin-bottom: 4px; line-height:1.6; color:#ccc;}
+/* LOG */
+.logbox{margin:0 auto 18px;width:90%;max-width:860px;background:rgba(0,0,0,.6);border:1px solid rgba(255,255,255,.1);padding:10px 15px;height:80px;overflow-y:auto;text-align:center;border-radius:8px;}
+.le{font-size:13px;margin-bottom:3px;line-height:1.6;color:#ccc;}
 .lh{color:var(--host);font-weight:700;}.lg{color:var(--guest);font-weight:700;}
+.la{color:var(--gold);font-weight:700;}
 
-/* ─── ANIMAÇÕES ─── */
-@keyframes linearGlow {
-  0% { border-color: rgba(201,168,76, 0.2); box-shadow: 0 0 5px rgba(201,168,76, 0.1); background: rgba(201,168,76, 0.05); }
-  100% { border-color: rgba(201,168,76, 1); box-shadow: 0 0 25px rgba(201,168,76, 0.6); background: rgba(201,168,76, 0.25); }
+/* ─── SEÇÃO: rótulo de separação ─── */
+.section-label{
+  font-family:var(--FT);font-size:10px;letter-spacing:3px;text-transform:uppercase;
+  color:#444;text-align:center;margin:2px 0 6px;
 }
-.suspense-glow { animation: linearGlow 1s linear infinite alternate !important; border-width: 2px !important; z-index: 5; }
 
-@keyframes fluidFlipIn {
-  0% { opacity: 0; transform: perspective(800px) rotateY(-90deg) scale(0.9); filter: brightness(1.5); }
-  100% { opacity: 1; transform: perspective(800px) rotateY(0deg) scale(1); filter: brightness(1); }
-}
-.gslot.reveal { animation: fluidFlipIn 0.6s cubic-bezier(0.25, 0.46, 0.45, 0.94) forwards; }
-
-@keyframes banSlamSlow {
-  0% { opacity: 0; transform: scale(2.5); filter: brightness(1.8); }
-  100% { opacity: 1; transform: scale(1); filter: brightness(1); }
-}
-.bc.pop { animation: banSlamSlow 1.5s linear forwards; }
-
-@keyframes mapReveal {
-  0% { opacity: 0; transform: translateY(20px); }
-  100% { opacity: 1; transform: translateY(0); }
-}
-.mframe.mrev { animation: mapReveal 0.8s ease-out forwards; }
-
-/* ─── GRIDS DEUSES (3 PICKS) ─── */
-.picks-row{display:flex;align-items:center;justify-content:center;gap:15px;padding:20px;}
-.gslot{width:180px; height:320px; background:rgba(0,0,0,0.4); border:1px solid var(--border); position:relative; overflow:hidden; display:flex; flex-direction:column; align-items:center; justify-content:center;}
+/* ══ PICKS DE DEUSES ══ */
+.picks-row{display:flex;align-items:flex-end;justify-content:center;gap:8px;padding:0 20px;margin-bottom:18px;}
+.gslot{background:rgba(0,0,0,.45);border:1px solid var(--border);position:relative;overflow:hidden;display:flex;flex-direction:column;align-items:center;justify-content:center;flex-shrink:0;}
 .gslot img{width:100%;height:100%;object-fit:cover;display:block;}
-.gbar{position:absolute;bottom:0;left:0;right:0; background:rgba(0,0,0,.8); font-family:var(--FT);font-size:13px;font-weight:700;text-align:center; padding:8px 2px;letter-spacing:1px;text-transform:uppercase;color:var(--gold2);}
+.gbar{position:absolute;bottom:0;left:0;right:0;background:rgba(0,0,0,.85);font-family:var(--FT);font-size:11px;font-weight:700;text-align:center;padding:5px 2px;text-transform:uppercase;color:var(--gold2);letter-spacing:.5px;}
+.gsep{width:2px;background:rgba(255,255,255,.08);align-self:stretch;margin:0 6px;flex-shrink:0;}
 
-/* ─── BANS (3 GODS | BARRA | 3 MAPAS) ─── */
-.bans-row{display:flex;align-items:center;justify-content:center;gap:40px;padding:10px 20px;}
-.ban-side{display:flex; align-items:center; gap:8px;}
+/* ══ BANS ══ */
+/* Linha de bans com 2 grupos: God Bans | separador | Map Bans */
+.bans-master{display:flex;align-items:center;justify-content:center;gap:0;padding:0 20px;margin-bottom:20px;}
 
-.ban-bar { width: 4px; height: 50px; border-radius: 2px; }
-.ban-bar.blue { background: var(--host); box-shadow: 0 0 10px var(--host); }
-.ban-bar.red { background: var(--guest); box-shadow: 0 0 10px var(--guest); }
+.bans-god-block,.bans-map-block{display:flex;align-items:center;gap:6px;flex-wrap:wrap;}
+.bans-divider{
+  width:1px;height:60px;background:rgba(255,255,255,.12);
+  margin:0 20px;flex-shrink:0;
+}
+.bans-type-label{
+  font-family:var(--FT);font-size:9px;letter-spacing:2px;text-transform:uppercase;
+  color:#555;writing-mode:vertical-rl;text-orientation:mixed;transform:rotate(180deg);
+  margin-right:4px;flex-shrink:0;
+}
 
-.bc{width:50px; height:50px; border-radius:50%; background:transparent; border:2px solid #ef4444; display:flex; align-items:center; justify-content:center; position:relative; overflow:hidden;}
-.bc img{width:100%;height:100%;object-fit:cover;filter:grayscale(1);opacity:0.5;}
-.bc.filled::after{content:'';position:absolute;inset:0; background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 44 44'%3E%3Cline x1='10' y1='10' x2='34' y2='34' stroke='%23ef4444' stroke-width='4' stroke-linecap='round'/%3E%3Cline x1='34' y1='10' x2='10' y2='34' stroke='%23ef4444' stroke-width='4' stroke-linecap='round'/%3E%3C/svg%3E") center/80% no-repeat;}
+/* Slot de ban circular */
+.bc{width:48px;height:48px;border-radius:50%;border:2px solid #ef4444;overflow:hidden;position:relative;display:flex;align-items:center;justify-content:center;flex-shrink:0;background:rgba(0,0,0,.4);}
+.bc img{width:100%;height:100%;object-fit:cover;opacity:.45;filter:grayscale(1);}
+.bc.filled::after{content:'';position:absolute;inset:0;background:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 44 44'%3E%3Cline x1='9' y1='9' x2='35' y2='35' stroke='%23ef4444' stroke-width='4'/%3E%3Cline x1='35' y1='9' x2='9' y2='35' stroke='%23ef4444' stroke-width='4'/%3E%3C/svg%3E") center/80% no-repeat;}
 
-/* ─── MAPAS ─── */
-.maps-row{display:flex;align-items:flex-end;justify-content:center;gap:20px;padding:20px;}
-.mc{display:flex;flex-direction:column;align-items:center;gap:8px;}
-.mframe{border:1px solid rgba(255,255,255,.3); background:rgba(0,0,0,0.5); display:flex;align-items:center;justify-content:center;position:relative;overflow:hidden;}
-.mframe.sm{width:130px;height:130px;}
-.mframe.lg{width:180px;height:180px;} 
+/* Barra colorida lateral HOST/GUEST */
+.ban-bar{width:3px;height:48px;border-radius:2px;flex-shrink:0;}
+.ban-bar.blue{background:var(--host);box-shadow:0 0 8px var(--host);}
+.ban-bar.red{background:var(--guest);box-shadow:0 0 8px var(--guest);}
+
+/* Separador central da área de bans (HOST | GUEST) */
+.bans-vs{font-family:var(--FT);font-size:10px;color:#333;letter-spacing:2px;margin:0 8px;flex-shrink:0;}
+
+/* ══ MAPAS ══ */
+.maps-row{display:flex;align-items:flex-end;justify-content:center;gap:10px;padding:0 20px 10px;}
+.mc{display:flex;flex-direction:column;align-items:center;gap:6px;flex-shrink:0;}
+.mframe{border:1px solid rgba(255,255,255,.3);background:rgba(0,0,0,.5);display:flex;align-items:center;justify-content:center;overflow:hidden;position:relative;}
 .mframe img{width:100%;height:100%;object-fit:cover;}
-.mname{font-family:var(--FB);font-size:12px;font-weight:700;text-transform:uppercase;color:#fff;text-align:center;background:#000;padding:4px 8px;width:100%;}
+.mname{font-family:var(--FB);font-size:10px;font-weight:700;text-transform:uppercase;color:#fff;text-align:center;background:#000;padding:3px 5px;width:100%;}
+.mframe.admin-frame{border-color:var(--gold);box-shadow:0 0 12px rgba(201,168,76,.3);}
+.mname.admin-name{color:var(--gold);}
 
-/* ─── IMAGES PAGE ─── */
-.imgpg{display:none; padding: 40px;}
-.igsec{margin-bottom: 40px;}
-.igsec h3 { display:flex; justify-content:space-between; align-items:center; font-family: var(--FT); color: var(--gold); text-transform: uppercase; letter-spacing: 2px; margin-bottom: 20px; font-size: 20px; border-bottom: 1px solid rgba(201,168,76,0.3); padding-bottom: 5px;}
-.iggrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap: 20px;}
-.icard { background: var(--card); border: 1px solid var(--border); display: flex; align-items: center; gap: 15px; padding: 15px; border-radius: 4px;}
-.ipreview { width: 80px; height: 80px; border: 1px solid rgba(255,255,255,0.1); background: rgba(0,0,0,0.5); border-radius: 4px; overflow: hidden; display: flex; align-items: center; justify-content: center; flex-shrink: 0;}
-.ipreview img { width: 100%; height: 100%; object-fit: cover; }
-.iname { font-family: var(--FT); color: #fff; font-weight: 700; font-size: 16px; text-transform: uppercase;}
-.iurl-container { display: flex; gap: 5px;}
-.iurl-input { flex: 1; background: rgba(0,0,0,0.3); border: 1px solid rgba(255,255,255,0.1); color: #fff; padding: 6px; font-family: var(--FB); font-size: 11px; border-radius: 2px; outline: none;}
-.ibtn-save { background: #22c55e; color: #000; border: none; padding: 6px 12px; cursor: pointer; font-family: var(--FB); font-weight: 700; font-size: 12px; border-radius: 2px;}
+/* ══ IMAGES PAGE ══ */
+.imgpg{display:none;padding:40px;}
+.portability-box{background:rgba(201,168,76,.08);border:1px solid var(--gold);padding:15px;border-radius:8px;margin-bottom:30px;display:flex;gap:15px;align-items:center;}
+.port-btn{font-family:var(--FT);font-weight:700;padding:8px 18px;border-radius:4px;border:none;cursor:pointer;text-transform:uppercase;font-size:11px;}
+.btn-exp{background:var(--gold);color:#000;}.btn-imp{background:#3b82f6;color:#fff;}
+.igsec{margin-top:40px;margin-bottom:30px;}
+.igsec h3{font-family:var(--FT);color:var(--gold);text-transform:uppercase;letter-spacing:2px;margin-bottom:20px;font-size:17px;border-bottom:1px solid rgba(201,168,76,.3);padding-bottom:8px;}
+.iggrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:12px;}
+.icard{background:var(--card);border:1px solid var(--border);display:flex;align-items:center;gap:12px;padding:10px;border-radius:4px;}
+.ipreview{width:60px;height:60px;border:1px solid rgba(255,255,255,.1);background:rgba(0,0,0,.5);border-radius:3px;overflow:hidden;display:flex;align-items:center;justify-content:center;flex-shrink:0;}
+.ipreview img{width:100%;height:100%;object-fit:cover;}
+.idetails{flex:1;display:flex;flex-direction:column;gap:5px;}
+.iname{font-family:var(--FT);color:#fff;font-weight:700;font-size:12px;text-transform:uppercase;}
+.iurl-box{display:flex;gap:5px;}
+.iurl-input{flex:1;background:#000;border:1px solid #333;color:#22c55e;padding:4px 7px;font-family:monospace;font-size:11px;border-radius:2px;outline:none;}
+.ibtn-save{background:#22c55e;color:#000;border:none;padding:4px 10px;cursor:pointer;font-family:var(--FB);font-weight:700;font-size:11px;border-radius:2px;}
 </style>
 </head>
 <body>
 
+<!-- ══ PAINEL DE CONTROLE ══ -->
 <div class="ctrl-panel" id="ctrls">
   <div class="tabs">
-    <button type="button" class="tab on" onclick="switchTab('overlay')">🎮 Overlay</button>
-    <button type="button" class="tab" onclick="switchTab('images')">🖼️ Imagens</button>
-    <button type="button" class="hide-btn" onclick="document.getElementById('ctrls').style.display='none'">👁️ Ocultar</button>
+    <button class="tab on" id="tab-ov" onclick="switchTab('overlay')">🎮 Overlay</button>
+    <button class="tab" id="tab-img" onclick="switchTab('images')">🖼️ Imagens</button>
+    <div class="mode-badge">Draft: <span id="mode-info">—</span></div>
+    <button class="hide-btn" id="btnMin" onclick="togglePainel()">收 Minimizar</button>
   </div>
   <div class="manual-panel">
-    <div style="display: flex; gap: 15px;">
-      <textarea id="manualGods" style="flex:1; height:80px; background:#000; color:#22c55e; border:1px solid #333; padding:8px;" placeholder="JSON Deuses..."></textarea>
-      <textarea id="manualMaps" style="flex:1; height:80px; background:#000; color:#22c55e; border:1px solid #333; padding:8px;" placeholder="JSON Mapas..."></textarea>
+    <!-- URLs -->
+    <div class="url-row">
+      <span class="url-label">🗡️ URL Gods</span>
+      <input type="text" id="urlGods" class="url-input" placeholder="https://aoe2cm.net/api/draft/XXXXX">
     </div>
-    <button type="button" class="btn-load" style="margin-top:10px" onclick="loadManual(event)">▶ Iniciar Simulação</button>
+    <div class="url-row">
+      <span class="url-label">🗺️ URL Maps</span>
+      <input type="text" id="urlMaps" class="url-input" placeholder="https://aoe2cm.net/api/draft/XXXXX">
+    </div>
+    <!-- JSON direto -->
+    <div style="color:#444;font-size:10px;font-family:var(--FT);letter-spacing:1px;margin:8px 0 5px;">— OU COLE JSON DIRETO —</div>
+    <div class="json-row">
+      <div style="flex:1"><div class="json-label">JSON Deuses</div><textarea id="manualGods" class="json-area" placeholder='{"events":[...],"nameHost":"...","nameGuest":"...","preset":{"draftOptions":[...]}}'></textarea></div>
+      <div style="flex:1"><div class="json-label">JSON Mapas</div><textarea id="manualMaps" class="json-area" placeholder='{"events":[...],"preset":{"draftOptions":[...]}}'></textarea></div>
+    </div>
+    <div style="display:flex;align-items:center;gap:10px;">
+      <button class="btn-load" onclick="initDraft()">▶ Iniciar Draft</button>
+      <button class="btn-reset" onclick="resetAll()">🔄 Resetar</button>
+    </div>
   </div>
 </div>
 
-<div id="page-overlay" class="page on">
-<div class="wrap">
-  <div class="hdr">
-    <div class="pblock L"><div class="ava" id="hAva">🛡️</div><div class="pname" id="hName">HOST</div></div>
-    <div class="vstx">VS</div>
-    <div class="pblock R"><div class="pname" id="gName">GUEST</div><div class="ava" id="gAva">⚔️</div></div>
-  </div>
-  <div class="logbox" id="logbox"><div class="le">Pronto. Insira os dados JSON.</div></div>
-  
-  <div class="picks-row">
-    <div class="gslot" id="hp0"></div><div class="gslot" id="hp1"></div><div class="gslot" id="hp2"></div>
-    <div style="width:40px;"></div>
-    <div class="gslot" id="gp0"></div><div class="gslot" id="gp1"></div><div class="gslot" id="gp2"></div>
-  </div>
-
-  <div class="bans-row">
-    <div class="ban-side">
-      <div class="bc" id="h-b-0"></div><div class="bc" id="h-b-1"></div><div class="bc" id="h-b-2"></div>
-      <div class="ban-bar blue"></div>
-      <div class="bc" id="h-b-3"></div><div class="bc" id="h-b-4"></div><div class="bc" id="h-b-5"></div>
+<!-- ══ OVERLAY ══ -->
+<div id="page-overlay">
+  <div class="wrap">
+    <!-- HEADER -->
+    <div class="hdr">
+      <div class="pblock L"><div class="ava" id="hAva">🛡️</div><div class="pname" id="hName">HOST</div></div>
+      <div class="vstx">VS</div>
+      <div class="pblock R"><div class="pname" id="gName">GUEST</div><div class="ava" id="gAva">⚔️</div></div>
     </div>
-    <div class="ban-side">
-      <div class="bc" id="g-b-0"></div><div class="bc" id="g-b-1"></div><div class="bc" id="g-b-2"></div>
-      <div class="ban-bar red"></div>
-      <div class="bc" id="g-b-3"></div><div class="bc" id="g-b-4"></div><div class="bc" id="g-b-5"></div>
-    </div>
-  </div>
+    <div class="logbox" id="logbox"><div class="le">Informe as URLs ou cole os JSONs e clique em Iniciar Draft.</div></div>
 
-  <div class="maps-row">
-    <div class="mc"><div class="mframe sm" id="hm0"></div><div class="mname">MAPA</div></div>
-    <div class="mc"><div class="mframe lg" id="adm"></div><div class="mname">ADMIN</div></div>
-    <div class="mc"><div class="mframe sm" id="gm0"></div><div class="mname">MAPA</div></div>
+    <!-- Rótulo picks -->
+    <div class="section-label" id="lbl-picks" style="display:none;">⚔ Picks de Deuses</div>
+    <!-- PICKS DINÂMICOS -->
+    <div class="picks-row" id="picks-row"></div>
+
+    <!-- Rótulo bans -->
+    <div class="section-label" id="lbl-bans" style="display:none;">✕ Bans</div>
+    <!-- BANS DINÂMICOS (gods + mapas juntos numa linha, separados visualmente) -->
+    <div class="bans-master" id="bans-master"></div>
+
+    <!-- Rótulo mapas -->
+    <div class="section-label" id="lbl-maps" style="display:none;">🗺 Picks de Mapas</div>
+    <!-- MAPAS DINÂMICOS -->
+    <div class="maps-row" id="maps-row"></div>
   </div>
 </div>
-</div>
 
+<!-- ══ IMAGES PAGE ══ -->
 <div id="page-images" class="imgpg">
-  <div class="igsec">
-    <h3>DEUSES (Caminhos Relativos)</h3>
-    <div class="iggrid" id="god-grid"></div>
+  <div class="portability-box">
+    <div style="flex:1"><strong style="color:var(--gold)">PORTABILIDADE DE LINKS</strong><br><small>Exporte/importe suas URLs entre PCs.</small></div>
+    <button class="port-btn btn-exp" onclick="exportLinks()">📥 Exportar</button>
+    <button class="port-btn btn-imp" onclick="document.getElementById('fileInput').click()">📤 Importar</button>
+    <input type="file" id="fileInput" style="display:none" accept=".json" onchange="importLinks(event)">
+    <button class="port-btn" style="background:#555;color:#fff" onclick="clearCache()">Resetar Links</button>
   </div>
-  <div class="igsec">
-    <h3>MAPAS</h3>
-    <div class="iggrid" id="map-grid"></div>
-  </div>
+  <div class="igsec"><h3>Deuses</h3><div class="iggrid" id="god-grid"></div></div>
+  <div class="igsec"><h3>Mapas</h3><div class="iggrid" id="map-grid"></div></div>
 </div>
+
+<div style="position:fixed;bottom:8px;right:10px;opacity:.2;font-family:var(--FT);font-size:10px;">DESENVOLVIDO POR [CAOK] PAIN</div>
 
 <script>
-// ═══ CONFIGURAÇÃO DE CAMINHOS RELATIVOS ═══
-var pDeuses = "Gods/";
-var pMapas = "Mapas/";
+/* ══════════════════════════════════════════
+   CACHE LOCAL DE IMAGENS (fallback)
+   As imageUrls do JSON têm prioridade.
+   O cache serve para override manual.
+══════════════════════════════════════════ */
+var IMG_CACHE = {};   // key = norm(id) → url
+function loadCache(){ IMG_CACHE = JSON.parse(localStorage.getItem('caok_img_cache')||'{}'); }
+function saveCache(){ localStorage.setItem('caok_img_cache', JSON.stringify(IMG_CACHE)); }
+loadCache();
 
-var GODS = {
-  zeus:{d:'Zeus',u:'https://i.ibb.co/F49NwfT9/zeus-icon.png'},
-  poseidon:{d:'Poseidon',u:'https://i.ibb.co/jvtLCW4S/poseidon-icon.png'},
-  hades:{d:'Hades',u:'https://i.ibb.co/tPwmkcCp/hades-icon.png'},
-  thor:{d:'Thor',u:'https://i.ibb.co/rGZPTwfL/thor-icon.png'},
-  odin:{d:'Odin',u:'https://i.ibb.co/95xDGLv/odin-icon.png'},
-  loki:{d:'Loki',u:'https://i.ibb.co/6RTX0Lj4/loki-icon.png'},
-  freyr:{d:'Freyr',u:'https://i.ibb.co/ynMrdFtG/freyr-icon.png'},
-  freya:{d:'Freya',u:'',alias:'freyr'},
-  ra:{d:'Ra',u:'https://i.ibb.co/JFHscCM7/ra-icon.png'},
-  isis:{d:'Isis',u:'https://i.ibb.co/j9C8bQrr/isis-icon.png'},
-  set:{d:'Set',u:'https://i.ibb.co/qMB7dP4L/set-icon.png'},
-  kronos:{d:'Kronos',u:'https://i.ibb.co/gbgpG2QW/kronos-icon.png'},
-  cronos:{d:'Cronos',u:'',alias:'kronos'},
-  oranos:{d:'Oranos',u:'https://i.ibb.co/rGtqd9hd/oranos-icon.png'},
-  gaia:{d:'Gaia',u:'https://i.ibb.co/Pv0QLMMK/gaia-icon.png'},
-  amaterasu:{d:'Amaterasu',u:'https://i.ibb.co/qYPMBSWG/amaterasu-icon.png'},
-  tsukuyomi:{d:'Tsukuyomi',u:'https://i.ibb.co/1tSCP2v4/tsukuyomi-icon.png'},
-  susanoo:{d:'Susanoo',u:'https://i.ibb.co/GQw62YpN/susanoo-icon.png'},
-  demeter:{d:'Deméter',u:'https://static.wikia.nocookie.net/ageofempires/images/7/7e/Demeter_artwork_AoMR.webp/revision/latest/scale-to-width-down/1000?cb=20260127183206'},
-  fuxi:{d:'Fu Xi',u:'https://i.ibb.co/tVSJ7WG/fuxi-icon.png'},
-  nuwa:{d:'Nu Wa',u:'https://i.ibb.co/v2xvKdw/nuwa-icon.png'},
-  shennong:{d:'Shennong',u:'https://i.ibb.co/7t3d6vZ4/shennong-icon.png'},
-  Tezcatlipoca:{d:'Tezcatlipoca',u:'https://clan.fastly.steamstatic.com/images//44894763/7eeb7eaa6735e354882e6df81da13dbef5e9dfda.jpg'},
-  Huitzilopochtli:{d:'Huitzilopochtli',u:'https://clan.fastly.steamstatic.com/images//44894763/fccaa934912290572f49a20438511751a32f8878.jpg'},
-  Quetzalcoatl:{d:'Quetzalcoatl',u:'https://clan.fastly.steamstatic.com/images//44894763/dde50e7960034bd66c5cb53931bf042b9221fb9a.jpg'}
-};
+/* ══════════════════════════════════════════
+   ESTADO
+══════════════════════════════════════════ */
+var timerIds   = [];
+var simEvents  = [];   // [{...ev, _type:'god'|'map'}]
+var curEvIdx   = 0;
 
-var MAP_LIST = ['Alfheim','Midgard','Oasis','Watering Hole','Anatolia','Ghost Lake','Marsh','Anatolia','Arena','Gold Rush','Steppe','Giza','Qinghai Lake','Blue Lagoon','Mediterranean','Mirage','Yellow River','Savannah','Tundra','Nile Shallows','Erebus'];
-// Deduplicate MAP_LIST
-MAP_LIST = MAP_LIST.filter((v,i,a) => a.indexOf(v) === i);
-var MAP_IMGS = {};
+// Mapa id → imageUrl (populado do JSON)
+var GOD_IMGS   = {};   // norm(id) → url
+var MAP_IMGS   = {};   // norm(id) → url
+var GOD_NAMES  = {};   // norm(id) → display name
+var MAP_NAMES  = {};   // norm(id) → display name
 
-function norm(s){ if(!s) return ''; s = s.replace(/^aomgods\./i, ''); return s.normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase().replace(/[^a-z]/g,''); }
-MAP_LIST.forEach(m => { var k = norm(m); MAP_IMGS[k] = pMapas + 'maps_' + k.replace(/\s+/g, '_') + '.png'; });
+// Contadores de progresso
+var SC = {hP:0,gP:0,hB:0,gB:0,hMB:0,gMB:0,hM:0,gM:0,adm:0};
 
-// Override with provided map URLs
-var MAP_URL_OVERRIDES = {
-  'alfheim': 'https://static.wikia.nocookie.net/ageofempires/images/c/c4/AoMR_Alfheim_map_icon.png/revision/latest?cb=20240920074941',
-  'anatolia': 'https://static.wikia.nocookie.net/ageofempires/images/1/15/AoMR_Anatolia_map_icon.png/revision/latest?cb=20240920074942',
-  'arena': 'https://static.wikia.nocookie.net/ageofempires/images/a/a2/AoMR_Arena_map_icon.png/revision/latest?cb=20240721083223',
-  'wateringhole': 'https://static.wikia.nocookie.net/ageofempires/images/0/01/AoMR_Watering_Hole_map_icon.png/revision/latest?cb=20240920075345',
-  'goldrush': 'https://static.wikia.nocookie.net/ageofempires/images/3/3a/AoMR_Gold_Rush_map_icon.png/revision/latest?cb=20240906191715',
-  'steppe': 'https://static.wikia.nocookie.net/ageofempires/images/b/ba/AoMR_Steppe.png/revision/latest?cb=20250303105325',
-  'giza': 'https://static.wikia.nocookie.net/ageofempires/images/3/33/AoMR_Giza_map_icon.png/revision/latest?cb=20240716202124',
-  'ghostlake': 'https://static.wikia.nocookie.net/ageofempires/images/5/55/AoMR_Ghost_Lake_map_icon.png/revision/latest?cb=20240920074948',
-  'qinghailake': 'https://static.wikia.nocookie.net/ageofempires/images/8/85/AoMR_Qinghai_Lake.png/revision/latest?cb=20250303105325',
-  'bluelagoon': 'https://static.wikia.nocookie.net/ageofempires/images/4/4c/AoMR_Blue_Lagoon_map_icon.png/revision/latest?cb=20240920074945',
-  'mediterranean': 'https://static.wikia.nocookie.net/ageofempires/images/4/4e/AoMR_Mediterranean_map_icon.png/revision/latest?cb=20240920075001',
-  'mirage': 'https://static.wikia.nocookie.net/ageofempires/images/a/af/AoMR_Mirage_map_icon.png/revision/latest?cb=20240721082851',
-  'oasis': 'https://static.wikia.nocookie.net/ageofempires/images/3/30/AoMR_Oasis_map_icon.png/revision/latest?cb=20240920075325',
-  'marsh': 'https://static.wikia.nocookie.net/ageofempires/images/a/ac/AoMR_Marsh_map_icon.png/revision/latest?cb=20240920074958',
-  'yellowriver': 'https://static.wikia.nocookie.net/ageofempires/images/5/58/AoMR_Yellow_River.png/revision/latest?cb=20250303105325',
-  'savannah': 'https://static.wikia.nocookie.net/ageofempires/images/4/49/AoMR_Savannah_map_icon.png/revision/latest?cb=20240920075331',
-  'tundra': 'https://static.wikia.nocookie.net/ageofempires/images/d/d7/AoMR_Tundra_map_icon.png/revision/latest?cb=20240920075339',
-  'nileshallows': 'https://static.wikia.nocookie.net/ageofempires/images/8/82/AoMR_Nile_Shallows_map_icon.png/revision/latest?cb=20240721082844',
-  'erebus': 'https://static.wikia.nocookie.net/ageofempires/images/5/5f/AoMR_Erebus_map_icon.png/revision/latest?cb=20240920074946',
-  'midgard': 'https://static.wikia.nocookie.net/ageofempires/images/f/ff/AoMR_Midgard_map_icon.png/revision/latest?cb=20240920075322'
-};
-Object.keys(MAP_URL_OVERRIDES).forEach(function(k){ MAP_IMGS[k] = MAP_URL_OVERRIDES[k]; });
-
-function isGod(s){ return !!GODS[norm(s)]; }
-function getImg(s){ var k=norm(s); if(GODS[k]) return GODS[k].alias ? GODS[GODS[k].alias].u : GODS[k].u; return MAP_IMGS[k] || null; }
-
-function switchTab(n){ document.getElementById('page-overlay').style.display = n==='overlay' ? 'block' : 'none'; document.getElementById('page-images').style.display = n==='images' ? 'block' : 'none'; var tabs = document.querySelectorAll('.tab'); tabs[0].className = n==='overlay' ? 'tab on' : 'tab'; tabs[1].className = n==='images' ? 'tab on' : 'tab'; if(n==='images') buildImgPanel(); }
-
-var SC={hP:0,gP:0,hB:0,gB:0,hM:0,gM:0}; 
-var simEvents = [];
-var curEvIndex = 0;
-
-function resetLayout() {
-  SC = {hP:0, gP:0, hB:0, gB:0, hM:0, gM:0}; 
-  document.querySelectorAll('.gslot, .bc, .mframe').forEach(e => { e.innerHTML = ''; e.className = e.className.split(' ')[0]; });
+/* ══════════════════════════════════════════
+   UTILITÁRIOS
+══════════════════════════════════════════ */
+function norm(s){
+  if(!s) return '';
+  return s.normalize("NFD").replace(/[\u0300-\u036f]/g,'')
+          .toLowerCase().replace(/[^a-z0-9]/g,'');
 }
 
-function loadManual(event) {
-  try {
-    var dG = JSON.parse(document.getElementById('manualGods').value || '{"events":[]}');
-    var dM = JSON.parse(document.getElementById('manualMaps').value || '{"events":[]}');
-    if(dG.draft) dG = dG.draft; if(dM.draft) dM = dM.draft;
-    simEvents = (dG.events || []).concat(dM.events || []);
-    resetLayout();
-    document.getElementById('hName').textContent = dG.nameHost || 'HOST';
-    document.getElementById('gName').textContent = dG.nameGuest || 'GUEST';
-    curEvIndex = 0;
-    setTimeout(processNextEvent, 1000);
-  } catch(e) { alert("Erro JSON!"); }
+// Pega imagem: JSON > cache manual
+function getGodImg(id){
+  var k = norm(id);
+  return IMG_CACHE['god_'+k] || GOD_IMGS[k] || '';
+}
+function getMapImg(id){
+  var k = norm(id);
+  return IMG_CACHE['map_'+k] || MAP_IMGS[k] || '';
 }
 
-function processNextEvent() {
-    if (curEvIndex >= simEvents.length) return;
-    var ev = simEvents[curEvIndex];
-    var act = (ev.actionType || ev.action || '').toUpperCase();
-    if(act.indexOf('REVEAL') !== -1 || !act) { curEvIndex++; processNextEvent(); return; }
-    var raw = ev.chosenOptionId || ev.civilisation || ev.chosenOptionValue || '';
-    var name = raw; if (name.indexOf('.') !== -1) name = name.split('.').pop(); 
-    var isH = ev.player === 'HOST', isAdm = (ev.player === 'NONE' || ev.player === 'ADMIN');
-    var pN = isAdm ? 'ADMIN' : (isH ? document.getElementById('hName').textContent : document.getElementById('gName').textContent);
+// Nome display limpo (remove prefixo "aomgods.")
+function cleanName(id){
+  var k = norm(id);
+  var disp = GOD_NAMES[k] || MAP_NAMES[k] || id;
+  return disp.replace(/^aomgods\./i,'');
+}
 
-    if (act === 'PICK') {
-        var tId = isAdm ? 'adm' : (isGod(name) ? (isH?'hp':'gp')+SC[isH?'hP':'gP'] : (isH?'hm':'gm')+SC[isH?'hM':'gM']);
-        var tEl = document.getElementById(tId);
-        if(tEl) tEl.classList.add('suspense-glow');
-        addLog(isH, pN, "está escolhendo...");
-        setTimeout(function() {
-            if(tEl) tEl.classList.remove('suspense-glow');
-            revealCard(ev, act, name, isH, isAdm, pN);
-            curEvIndex++;
-            setTimeout(processNextEvent, 3000); 
-        }, 5000);
-    } else if (act === 'BAN') {
-        var tBId = (isH ? 'h-b-' : 'g-b-') + SC[isH ? 'hB' : 'gB'];
-        var tBEl = document.getElementById(tBId);
-        if(tBEl) tBEl.classList.add('suspense-glow');
-        addLog(isH, pN, "está banindo...");
-        setTimeout(function() {
-            if(tBEl) tBEl.classList.remove('suspense-glow');
-            revealCard(ev, act, name, isH, isAdm, pN);
-            curEvIndex++;
-            setTimeout(processNextEvent, 3000); 
-        }, 5000);
+/* ══════════════════════════════════════════
+   POPULAR DICIONÁRIOS A PARTIR DO JSON
+══════════════════════════════════════════ */
+function populateDicts(dataGods, dataMaps){
+  // Deuses: draftOptions
+  (dataGods.preset && dataGods.preset.draftOptions || []).forEach(function(opt){
+    var k = norm(opt.id);
+    var url = (opt.imageUrls && (opt.imageUrls.unit || opt.imageUrls.emblem)) || '';
+    GOD_IMGS[k]  = url;
+    GOD_NAMES[k] = opt.name.replace(/^aomgods\./i,'');
+  });
+  // Mapas: draftOptions
+  (dataMaps.preset && dataMaps.preset.draftOptions || []).forEach(function(opt){
+    var k = norm(opt.id);
+    var url = (opt.imageUrls && (opt.imageUrls.unit || opt.imageUrls.emblem)) || '';
+    MAP_IMGS[k]  = url;
+    MAP_NAMES[k] = opt.name;
+  });
+}
+
+/* ══════════════════════════════════════════
+   ANÁLISE DO JSON → LAYOUT
+   Conta quantos picks/bans de cada tipo/lado
+══════════════════════════════════════════ */
+function analyseLayout(evGods, evMaps){
+  var hP=0,gP=0,hB=0,gB=0,hMB=0,gMB=0,hM=0,gM=0,hasAdmin=false;
+
+  evGods.forEach(function(ev){
+    var act = (ev.actionType||'').toLowerCase();
+    var isH = ev.player === 'HOST';
+    if(act === 'pick'){ isH ? hP++ : gP++; }
+    else if(act === 'ban'){ isH ? hB++ : gB++; }
+  });
+  evMaps.forEach(function(ev){
+    var act = (ev.actionType||'').toLowerCase();
+    var pl  = ev.player;
+    if(act === 'ban'){
+      if(pl==='HOST') hMB++;
+      else if(pl==='GUEST') gMB++;
+    } else if(act === 'pick'){
+      if(pl==='NONE') hasAdmin = true;
+      else if(pl==='HOST') hM++;
+      else if(pl==='GUEST') gM++;
     }
+  });
+  return {hP,gP,hB,gB,hMB,gMB,hM,gM,hasAdmin};
 }
 
-function revealCard(ev, act, name, isH, isAdm, pN) {
-    var img = getImg(name); var htmlI = img ? `<img src="${img}">` : '';
-    if(act === 'PICK'){
-        if(isAdm){ document.getElementById('adm').innerHTML = htmlI; document.getElementById('adm').classList.add('mrev'); }
-        else if(isGod(name)){ 
-            var id = (isH ? 'hp' : 'gp') + SC[isH ? 'hP' : 'gP'];
-            var el = document.getElementById(id);
-            if(el) { el.innerHTML = htmlI + `<div class="gbar">${name.toUpperCase()}</div>`; el.classList.add('reveal'); }
-            SC[isH ? 'hP' : 'gP']++;
-        } else {
-            var mid = (isH ? 'hm' : 'gm') + SC[isH ? 'hM' : 'gM'];
-            var f = document.getElementById(mid);
-            if(f) { f.innerHTML = htmlI; f.classList.add('mrev'); }
-            SC[isH ? 'hM' : 'gM']++;
-        }
-    } else if(act === 'BAN'){
-        var bid = (isH ? 'h-b-' : 'g-b-') + SC[isH ? 'hB' : 'gB'];
-        var bel = document.getElementById(bid);
-        if(bel){ bel.className = 'bc filled pop'; bel.innerHTML = htmlI; }
-        SC[isH ? 'hB' : 'gB']++;
+/* ══════════════════════════════════════════
+   BUILD DOM DINÂMICO
+══════════════════════════════════════════ */
+function buildLayout(L){
+  // ── Picks de Deuses ──
+  var pr = document.getElementById('picks-row');
+  pr.innerHTML = '';
+  var totalPicks = L.hP + L.gP;
+  var cW = totalPicks <= 6 ? 165 : totalPicks <= 10 ? 140 : 115;
+  var cH = Math.round(cW * 1.95);
+
+  for(var i=0;i<L.hP;i++){
+    var s=document.createElement('div');
+    s.className='gslot'; s.id='hp_'+i;
+    s.style.cssText='width:'+cW+'px;height:'+cH+'px;';
+    pr.appendChild(s);
+  }
+  var sep=document.createElement('div'); sep.className='gsep'; pr.appendChild(sep);
+  for(var j=0;j<L.gP;j++){
+    var s2=document.createElement('div');
+    s2.className='gslot'; s2.id='gp_'+j;
+    s2.style.cssText='width:'+cW+'px;height:'+cH+'px;';
+    pr.appendChild(s2);
+  }
+  document.getElementById('lbl-picks').style.display = totalPicks>0?'block':'none';
+
+  // ── Bans (gods + maps numa linha) ──
+  var bm = document.getElementById('bans-master');
+  bm.innerHTML = '';
+
+  var hasBans = L.hB||L.gB||L.hMB||L.gMB;
+  document.getElementById('lbl-bans').style.display = hasBans?'block':'none';
+  bm.style.display = hasBans?'flex':'none';
+
+  if(hasBans){
+    // ─ HOST side: god bans + map bans ─
+    var hostBlock = document.createElement('div');
+    hostBlock.style.cssText='display:flex;align-items:center;gap:6px;';
+
+    // Barra azul HOST
+    var barH=document.createElement('div'); barH.className='ban-bar blue'; hostBlock.appendChild(barH);
+
+    if(L.hB>0){
+      var lblHG=document.createElement('div'); lblHG.className='bans-type-label'; lblHG.textContent='GODS'; hostBlock.appendChild(lblHG);
+      for(var i=0;i<L.hB;i++){
+        var bc=document.createElement('div'); bc.className='bc'; bc.id='hgb_'+i; hostBlock.appendChild(bc);
+      }
     }
-    addLog(isH, pN, (act==='BAN'?'baniu ':'escolheu ')+name.toUpperCase());
+    if(L.hMB>0){
+      var lblHM=document.createElement('div'); lblHM.className='bans-type-label'; lblHM.textContent='MAPS'; hostBlock.appendChild(lblHM);
+      for(var i=0;i<L.hMB;i++){
+        var bc2=document.createElement('div'); bc2.className='bc'; bc2.id='hmb_'+i; hostBlock.appendChild(bc2);
+      }
+    }
+    bm.appendChild(hostBlock);
+
+    // Divisor central
+    var dvs=document.createElement('div'); dvs.className='bans-divider'; bm.appendChild(dvs);
+
+    // ─ GUEST side ─
+    var guestBlock = document.createElement('div');
+    guestBlock.style.cssText='display:flex;align-items:center;gap:6px;';
+
+    if(L.gB>0){
+      var lblGG=document.createElement('div'); lblGG.className='bans-type-label'; lblGG.textContent='GODS'; guestBlock.appendChild(lblGG);
+      for(var i=0;i<L.gB;i++){
+        var bc3=document.createElement('div'); bc3.className='bc'; bc3.id='ggb_'+i; guestBlock.appendChild(bc3);
+      }
+    }
+    if(L.gMB>0){
+      var lblGM=document.createElement('div'); lblGM.className='bans-type-label'; lblGM.textContent='MAPS'; guestBlock.appendChild(lblGM);
+      for(var i=0;i<L.gMB;i++){
+        var bc4=document.createElement('div'); bc4.className='bc'; bc4.id='gmb_'+i; guestBlock.appendChild(bc4);
+      }
+    }
+    // Barra vermelha GUEST
+    var barG=document.createElement('div'); barG.className='ban-bar red'; guestBlock.appendChild(barG);
+    bm.appendChild(guestBlock);
+  }
+
+  // ── Picks de Mapas ──
+  var mr = document.getElementById('maps-row');
+  mr.innerHTML='';
+  var totalMaps = L.hM + L.gM + (L.hasAdmin?1:0);
+  var mW = totalMaps<=3 ? 155 : totalMaps<=5 ? 130 : 110;
+  var mH = Math.round(mW*0.75);
+  var mWA= Math.round(mW*1.18); var mHA=Math.round(mH*1.18);
+
+  // Host maps (exibidos em ordem reversa para ficarem à esquerda do admin)
+  var hmCells=[];
+  for(var i=0;i<L.hM;i++){
+    var mc=makeMC('hm_'+i,'H MAP '+(i+1),false,mW,mH); hmCells.push(mc);
+  }
+  hmCells.reverse().forEach(c=>mr.appendChild(c));
+
+  // Admin
+  if(L.hasAdmin) mr.appendChild(makeMC('adm','ADMIN',true,mWA,mHA));
+
+  // Guest maps
+  for(var j=0;j<L.gM;j++){
+    mr.appendChild(makeMC('gm_'+j,'G MAP '+(j+1),false,mW,mH));
+  }
+  document.getElementById('lbl-maps').style.display = totalMaps>0?'block':'none';
+
+  // Badge
+  var info='God picks: '+totalPicks+' | God bans: '+(L.hB+L.gB)+' | Map bans: '+(L.hMB+L.gMB)+' | Mapas: '+totalMaps;
+  document.getElementById('mode-info').textContent = info;
 }
 
-function addLog(isH, pN, txt) {
-    var lb = document.getElementById('logbox');
-    var last = lb.lastElementChild;
-    var res = `<span class="${isH?'lh':'lg'}">${pN}</span> ${txt}`;
-    if (last && (last.innerText.includes("escolhendo") || last.innerText.includes("banindo"))) last.innerHTML = res;
-    else lb.innerHTML += `<div class="le">${res}</div>`;
-    lb.scrollTop = lb.scrollHeight;
+function makeMC(id,label,isAdmin,w,h){
+  var mc=document.createElement('div'); mc.className='mc';
+  var mf=document.createElement('div'); mf.className='mframe'+(isAdmin?' admin-frame':''); mf.id=id;
+  mf.style.cssText='width:'+w+'px;height:'+h+'px;';
+  var mn=document.createElement('div'); mn.className='mname'+(isAdmin?' admin-name':''); mn.textContent=label;
+  mc.appendChild(mf); mc.appendChild(mn);
+  return mc;
 }
 
-function saveAndPreview(key, inputId, isMap){
-  var url = document.getElementById(inputId).value;
-  var previewEl = document.getElementById('preview-' + inputId);
-  if(url) previewEl.innerHTML = `<img src="${url}" alt="${key}">`; 
-  else previewEl.innerHTML = `<span class="ipreview-placeholder">⚡</span>`;
-  if(isMap) MAP_IMGS[norm(key)] = url; else GODS[key].u = url;
+/* ══════════════════════════════════════════
+   PROCESSAMENTO DE EVENTOS
+══════════════════════════════════════════ */
+function processNextEvent(){
+  if(curEvIdx >= simEvents.length) return;
+  var ev  = simEvents[curEvIdx];
+  var act = (ev.actionType||'').toLowerCase();
+  var tp  = ev._type; // 'god' ou 'map'
+  var isH = ev.player === 'HOST';
+  var isAdmin = ev.player === 'NONE';
+  var pN  = isAdmin ? 'ADMIN' : (isH ? document.getElementById('hName').textContent : document.getElementById('gName').textContent);
+
+  if(act !== 'pick' && act !== 'ban'){ curEvIdx++; processNextEvent(); return; }
+
+  // Determina elemento alvo
+  var targetId = null;
+  if(act === 'pick'){
+    if(tp === 'god'){
+      targetId = (isH?'hp_':'gp_') + SC[isH?'hP':'gP'];
+    } else {
+      if(isAdmin) targetId = 'adm';
+      else targetId = (isH?'hm_':'gm_') + SC[isH?'hM':'gM'];
+    }
+  } else { // ban
+    if(tp === 'god'){
+      targetId = (isH?'hgb_':'ggb_') + SC[isH?'hB':'gB'];
+    } else {
+      targetId = (isH?'hmb_':'gmb_') + SC[isH?'hMB':'gMB'];
+    }
+  }
+
+  var tEl = targetId ? document.getElementById(targetId) : null;
+  if(tEl) tEl.classList.add('suspense-glow');
+
+  var actionTxt = act==='ban' ? 'está banindo...' : 'está escolhendo...';
+  addLog(isH, isAdmin, pN, actionTxt, 'thinking');
+
+  timerIds.push(setTimeout(function(){
+    if(tEl) tEl.classList.remove('suspense-glow');
+    revealCard(ev, act, tp, isH, isAdmin, pN, tEl);
+    curEvIdx++;
+    timerIds.push(setTimeout(processNextEvent, 3000));
+  }, 5000));
 }
 
+function revealCard(ev, act, tp, isH, isAdmin, pN, tEl){
+  var id   = ev.chosenOptionId || '';
+  var name = cleanName(id);
+  var img  = tp==='god' ? getGodImg(id) : getMapImg(id);
+  var imgH = img ? '<img src="'+img+'">' : '';
+
+  if(act === 'pick'){
+    if(tp === 'god'){
+      var el = document.getElementById((isH?'hp_':'gp_')+SC[isH?'hP':'gP']);
+      if(el){ el.innerHTML = imgH+'<div class="gbar">'+name.toUpperCase()+'</div>'; el.classList.add('reveal'); }
+      SC[isH?'hP':'gP']++;
+    } else {
+      var elM;
+      if(isAdmin){ elM = document.getElementById('adm'); SC.adm++; }
+      else { elM = document.getElementById((isH?'hm_':'gm_')+SC[isH?'hM':'gM']); SC[isH?'hM':'gM']++; }
+      if(elM){ elM.innerHTML = imgH; elM.classList.add('mrev'); }
+    }
+  } else { // ban
+    var elB;
+    if(tp === 'god'){
+      elB = document.getElementById((isH?'hgb_':'ggb_')+SC[isH?'hB':'gB']);
+      SC[isH?'hB':'gB']++;
+    } else {
+      elB = document.getElementById((isH?'hmb_':'gmb_')+SC[isH?'hMB':'gMB']);
+      SC[isH?'hMB':'gMB']++;
+    }
+    if(elB){ elB.className='bc filled pop'; elB.innerHTML=imgH; }
+  }
+
+  var label = act==='ban' ? 'baniu ' : 'escolheu ';
+  addLog(isH, isAdmin, pN, label+name.toUpperCase());
+}
+
+function addLog(isH, isAdmin, pN, txt, cls){
+  var lb = document.getElementById('logbox');
+  var last = lb.lastElementChild;
+  var nameClass = isAdmin ? 'la' : (isH ? 'lh' : 'lg');
+  var res = '<span class="'+nameClass+'">'+pN+'</span> '+txt;
+  if(last && last.classList.contains('thinking')){ last.innerHTML=res; last.classList.remove('thinking'); }
+  else lb.innerHTML += '<div class="le '+(cls||'')+'">' + res + '</div>';
+  lb.scrollTop = lb.scrollHeight;
+}
+
+/* ══════════════════════════════════════════
+   INIT — CARREGA JSONs (URL ou paste)
+══════════════════════════════════════════ */
+async function initDraft(){
+  timerIds.forEach(id=>clearTimeout(id)); timerIds=[];
+  SC = {hP:0,gP:0,hB:0,gB:0,hMB:0,gMB:0,hM:0,gM:0,adm:0};
+  curEvIdx = 0;
+
+  var urlG = document.getElementById('urlGods').value.trim();
+  var urlM = document.getElementById('urlMaps').value.trim();
+  var rawG = document.getElementById('manualGods').value.trim();
+  var rawM = document.getElementById('manualMaps').value.trim();
+
+  var dataG={events:[],preset:{draftOptions:[]},nameHost:'HOST',nameGuest:'GUEST'};
+  var dataM={events:[],preset:{draftOptions:[]}};
+
+  try{
+    if(urlG){ var r=await fetch(urlG); dataG=await r.json(); }
+    else if(rawG){ dataG=JSON.parse(rawG); }
+
+    if(urlM){ var r2=await fetch(urlM); dataM=await r2.json(); }
+    else if(rawM){ dataM=JSON.parse(rawM); }
+  } catch(e){ alert('Erro ao carregar JSON:\n'+e.message); return; }
+
+  // Nomes reais dos jogadores (vêm do JSON de deuses)
+  var hName = dataG.nameHost  || dataM.nameHost  || 'HOST';
+  var gName = dataG.nameGuest || dataM.nameGuest || 'GUEST';
+  document.getElementById('hName').textContent = hName.toUpperCase();
+  document.getElementById('gName').textContent = gName.toUpperCase();
+
+  // Dicionários de imagens e nomes
+  GOD_IMGS={}; GOD_NAMES={}; MAP_IMGS={}; MAP_NAMES={};
+  populateDicts(dataG, dataM);
+
+  // Eventos marcados com _type
+  var evGods = (dataG.events||[]).map(function(e){ return Object.assign({},e,{_type:'god'}); });
+  var evMaps = (dataM.events||[]).map(function(e){ return Object.assign({},e,{_type:'map'}); });
+
+  // Analisa e constrói layout
+  var L = analyseLayout(evGods, evMaps);
+  buildLayout(L);
+
+  // Ordena todos os eventos por offset (tempo real do draft)
+  simEvents = evGods.concat(evMaps);
+  simEvents.sort(function(a,b){ return (a.offset||0)-(b.offset||0); });
+
+  document.getElementById('logbox').innerHTML =
+    '<div class="le">Draft de <span class="lh">'+hName.toUpperCase()+'</span> vs <span class="lg">'+gName.toUpperCase()+'</span> carregado — '+simEvents.length+' eventos.</div>';
+
+  if(!document.getElementById('ctrls').classList.contains('minimized')) togglePainel();
+  timerIds.push(setTimeout(processNextEvent, 1200));
+}
+
+/* ══════════════════════════════════════════
+   RESET
+══════════════════════════════════════════ */
+function resetAll(){
+  timerIds.forEach(id=>clearTimeout(id)); timerIds=[];
+  SC={hP:0,gP:0,hB:0,gB:0,hMB:0,gMB:0,hM:0,gM:0,adm:0};
+  curEvIdx=0; simEvents=[];
+  document.getElementById('picks-row').innerHTML='';
+  document.getElementById('bans-master').innerHTML='';
+  document.getElementById('maps-row').innerHTML='';
+  document.getElementById('hName').textContent='HOST';
+  document.getElementById('gName').textContent='GUEST';
+  document.getElementById('logbox').innerHTML='<div class="le">Resetado. Aguardando novo draft.</div>';
+  document.getElementById('mode-info').textContent='—';
+  document.getElementById('lbl-picks').style.display='none';
+  document.getElementById('lbl-bans').style.display='none';
+  document.getElementById('lbl-maps').style.display='none';
+  if(document.getElementById('ctrls').classList.contains('minimized')) togglePainel();
+}
+
+/* ══════════════════════════════════════════
+   UI
+══════════════════════════════════════════ */
+function switchTab(n){
+  document.getElementById('page-overlay').style.display = n==='overlay'?'block':'none';
+  document.getElementById('page-images').style.display  = n==='images'?'block':'none';
+  document.getElementById('tab-ov').className = n==='overlay'?'tab on':'tab';
+  document.getElementById('tab-img').className= n==='images'?'tab on':'tab';
+  if(n==='images') buildImgPanel();
+}
+
+function togglePainel(){
+  var p=document.getElementById('ctrls'), b=document.getElementById('btnMin');
+  p.classList.toggle('minimized');
+  b.textContent = p.classList.contains('minimized')?"⚙️ Abrir Painel":"收 Minimizar";
+}
+
+/* ══════════════════════════════════════════
+   GERENCIADOR DE IMAGENS (override manual)
+══════════════════════════════════════════ */
 function buildImgPanel(){
-  var gG = document.getElementById('god-grid'); gG.innerHTML = '';
-  Object.keys(GODS).forEach(k => { 
-    if(GODS[k].alias) return;
-    var godUrl = GODS[k].u || '';
-    gG.innerHTML += `<div class="icard"><div class="ipreview" id="preview-i-${k}">${godUrl?`<img src="${godUrl}">`:''}</div><div class="idetails"><div class="iname">${GODS[k].d}</div><div class="iurl-container"><input type="text" id="i-${k}" class="iurl-input" value="${godUrl}"><button type="button" class="ibtn-save" onclick="saveAndPreview('${k}', 'i-${k}', false)">TESTAR</button></div></div></div>`; 
+  var gG=document.getElementById('god-grid'); gG.innerHTML='';
+  Object.keys(GOD_NAMES).forEach(function(k){
+    var url = IMG_CACHE['god_'+k] || GOD_IMGS[k] || '';
+    gG.innerHTML+=`<div class="icard">
+      <div class="ipreview">${url?`<img src="${url}">`:''}</div>
+      <div class="idetails">
+        <div class="iname">${GOD_NAMES[k]||k}</div>
+        <div class="iurl-box">
+          <input type="text" id="cg-${k}" class="iurl-input" value="${url}">
+          <button class="ibtn-save" onclick="saveImg('god','${k}')">OK</button>
+        </div>
+      </div></div>`;
   });
-  var mG = document.getElementById('map-grid'); mG.innerHTML = '';
-  MAP_LIST.forEach(m => {
-    var key = norm(m); var mapUrl = MAP_IMGS[key] || '';
-    mG.innerHTML += `<div class="icard"><div class="ipreview" id="preview-im-${m}">${mapUrl?`<img src="${mapUrl}">`:''}</div><div class="idetails"><div class="iname">${m}</div><div class="iurl-container"><input type="text" id="im-${m}" class="iurl-input" value="${mapUrl}"><button type="button" class="ibtn-save" onclick="saveAndPreview('${m}', 'im-${m}', true)">TESTAR</button></div></div></div>`;
+  var mG=document.getElementById('map-grid'); mG.innerHTML='';
+  Object.keys(MAP_NAMES).forEach(function(k){
+    var url = IMG_CACHE['map_'+k] || MAP_IMGS[k] || '';
+    mG.innerHTML+=`<div class="icard">
+      <div class="ipreview">${url?`<img src="${url}">`:''}</div>
+      <div class="idetails">
+        <div class="iname">${MAP_NAMES[k]||k}</div>
+        <div class="iurl-box">
+          <input type="text" id="cm-${k}" class="iurl-input" value="${url}">
+          <button class="ibtn-save" onclick="saveImg('map','${k}')">OK</button>
+        </div>
+      </div></div>`;
   });
 }
-buildImgPanel();
-</script>
 
+function saveImg(type,k){
+  var el=document.getElementById('c'+type[0]+'-'+k);
+  if(el){ IMG_CACHE[type+'_'+k]=el.value; saveCache(); buildImgPanel(); }
+}
+function exportLinks(){
+  var a=document.createElement('a');
+  a.href=URL.createObjectURL(new Blob([JSON.stringify(IMG_CACHE)],{type:'application/json'}));
+  a.download='caok_links.json'; a.click();
+}
+function importLinks(ev){
+  var r=new FileReader();
+  r.onload=function(e){ IMG_CACHE=JSON.parse(e.target.result); saveCache(); location.reload(); };
+  r.readAsText(ev.target.files[0]);
+}
+function clearCache(){
+  if(confirm("Remover todos os overrides de link?")){ localStorage.removeItem('caok_img_cache'); location.reload(); }
+}
+</script>
 <div class="ftr" style="margin-top: 20px; margin-left: 10px; opacity:0.5; font-family:var(--FT); font-size:11px; text-align: left;">
     <span>DESENVOLVIDO POR <a href="https://www.youtube.com/@CaOK_PaiN" target="_blank" style="text-decoration: none; color: inherit;"><b>[CAOK] PAIN</b></a></span>
-    <br><span>Versão 1.0.0</span>
+    <br><span>Versão 1.2</span>
 </div>
-
+  
 </body>
 </html>
