@@ -186,7 +186,18 @@ html,body{background:var(--bg);color:#e8e0d0;font-family:var(--FB);min-height:10
   </div>
 </div>
 
-
+<!-- ══ IMAGES PAGE ══ -->
+<div id="page-images" class="imgpg">
+  <div class="portability-box">
+    <div style="flex:1"><strong style="color:var(--gold)">PORTABILIDADE DE LINKS</strong><br><small>Exporte/importe suas URLs entre PCs.</small></div>
+    <button class="port-btn btn-exp" onclick="exportLinks()">📥 Exportar</button>
+    <button class="port-btn btn-imp" onclick="document.getElementById('fileInput').click()">📤 Importar</button>
+    <input type="file" id="fileInput" style="display:none" accept=".json" onchange="importLinks(event)">
+    <button class="port-btn" style="background:#555;color:#fff" onclick="clearCache()">Resetar Links</button>
+  </div>
+  <div class="igsec"><h3>Deuses</h3><div class="iggrid" id="god-grid"></div></div>
+  <div class="igsec"><h3>Mapas</h3><div class="iggrid" id="map-grid"></div></div>
+</div>
 
 <script>
 /* ══════════════════════════════════════════
