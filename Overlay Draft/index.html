@@ -557,9 +557,22 @@ async function initDraft(){
   // Copia total de picks HOST para SC (usado no preenchimento reverso)
   SC._hPTotal = L.hP;
 
-  // Ordena todos os eventos por offset (tempo real do draft)
-  simEvents = evGods.concat(evMaps);
-  simEvents.sort(function(a,b){ return (a.offset||0)-(b.offset||0); });
+  // Ordem fixa: Ban Gods → Pick Gods → Ban Maps → Pick Maps
+  // Dentro de cada fase, mantém a ordem original do JSON (offset)
+  function phaseOf(ev){
+    var act = (ev.actionType||'').toLowerCase();
+    var tp  = ev._type;
+    if(tp==='god' && act==='ban')  return 0;
+    if(tp==='god' && act==='pick') return 1;
+    if(tp==='map' && act==='ban')  return 2;
+    if(tp==='map' && act==='pick') return 3;
+    return 4;
+  }
+  var godBans  = evGods.filter(function(e){ return (e.actionType||'').toLowerCase()==='ban'; }).sort(function(a,b){ return (a.offset||0)-(b.offset||0); });
+  var godPicks = evGods.filter(function(e){ return (e.actionType||'').toLowerCase()==='pick'; }).sort(function(a,b){ return (a.offset||0)-(b.offset||0); });
+  var mapBans  = evMaps.filter(function(e){ return (e.actionType||'').toLowerCase()==='ban'; }).sort(function(a,b){ return (a.offset||0)-(b.offset||0); });
+  var mapPicks = evMaps.filter(function(e){ return (e.actionType||'').toLowerCase()==='pick'; }).sort(function(a,b){ return (a.offset||0)-(b.offset||0); });
+  simEvents = godBans.concat(godPicks).concat(mapBans).concat(mapPicks);
 
   document.getElementById('logbox').innerHTML =
     '<div class="le">Draft de <span class="lh">'+hName.toUpperCase()+'</span> vs <span class="lg">'+gName.toUpperCase()+'</span> carregado — '+simEvents.length+' eventos.</div>';
