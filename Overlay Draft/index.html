@@ -348,25 +348,24 @@ function buildLayout(L){
   bm.style.display = hasBans?'flex':'none';
 
   if(hasBans){
-    // ─ HOST side: god bans + map bans ─
+    // ─ HOST side: espelhado — Map bans (esq) → God bans → barra azul (dir) ─
     var hostBlock = document.createElement('div');
     hostBlock.style.cssText='display:flex;align-items:center;gap:6px;';
 
-    // Barra azul HOST
-    var barH=document.createElement('div'); barH.className='ban-bar blue'; hostBlock.appendChild(barH);
-
-    if(L.hB>0){
-      var lblHG=document.createElement('div'); lblHG.className='bans-type-label'; lblHG.textContent='GODS'; hostBlock.appendChild(lblHG);
-      for(var i=0;i<L.hB;i++){
-        var bc=document.createElement('div'); bc.className='bc'; bc.id='hgb_'+i; hostBlock.appendChild(bc);
-      }
-    }
     if(L.hMB>0){
-      var lblHM=document.createElement('div'); lblHM.className='bans-type-label'; lblHM.textContent='MAPS'; hostBlock.appendChild(lblHM);
-      for(var i=0;i<L.hMB;i++){
+      for(var i=L.hMB-1;i>=0;i--){
         var bc2=document.createElement('div'); bc2.className='bc'; bc2.id='hmb_'+i; hostBlock.appendChild(bc2);
       }
+      var lblHM=document.createElement('div'); lblHM.className='bans-type-label'; lblHM.textContent='MAPS'; hostBlock.appendChild(lblHM);
     }
+    if(L.hB>0){
+      for(var i=L.hB-1;i>=0;i--){
+        var bc=document.createElement('div'); bc.className='bc'; bc.id='hgb_'+i; hostBlock.appendChild(bc);
+      }
+      var lblHG=document.createElement('div'); lblHG.className='bans-type-label'; lblHG.textContent='GODS'; hostBlock.appendChild(lblHG);
+    }
+    // Barra azul HOST (direita)
+    var barH=document.createElement('div'); barH.className='ban-bar blue'; hostBlock.appendChild(barH);
     bm.appendChild(hostBlock);
 
     // Divisor central
