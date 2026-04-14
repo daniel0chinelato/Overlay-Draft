@@ -70,7 +70,9 @@ html,body{background:var(--bg);color:#e8e0d0;font-family:var(--FB);min-height:10
 }
 
 /* ══ PICKS DE DEUSES ══ */
-.picks-row{display:flex;align-items:flex-end;justify-content:center;gap:8px;padding:0 20px;margin-bottom:18px;}
+.picks-row{display:flex;align-items:flex-end;justify-content:center;gap:0;padding:0 20px;margin-bottom:18px;}
+.picks-host{display:flex;align-items:flex-end;justify-content:flex-end;gap:8px;flex:1;}
+.picks-guest{display:flex;align-items:flex-end;justify-content:flex-start;gap:8px;flex:1;}
 .gslot{background:rgba(0,0,0,.45);border:1px solid var(--border);position:relative;overflow:hidden;display:flex;flex-direction:column;align-items:center;justify-content:center;flex-shrink:0;}
 .gslot img{width:100%;height:100%;object-fit:cover;display:block;}
 .gbar{position:absolute;bottom:0;left:0;right:0;background:rgba(0,0,0,.85);font-family:var(--FT);font-size:11px;font-weight:700;text-align:center;padding:5px 2px;text-transform:uppercase;color:var(--gold2);letter-spacing:.5px;}
@@ -198,7 +200,10 @@ html,body{background:var(--bg);color:#e8e0d0;font-family:var(--FB);min-height:10
   <div class="igsec"><h3>Mapas</h3><div class="iggrid" id="map-grid"></div></div>
 </div>
 
-<div style="position:fixed;bottom:8px;right:10px;opacity:.2;font-family:var(--FT);font-size:10px;">DESENVOLVIDO POR [CAOK] PAIN</div>
+<div class="ftr" style="position: fixed; bottom: 10px; left: 10px; z-index: 1000; opacity: 0.5; font-family: var(--FT); font-size: 11px; text-align: left;">
+    <span>DESIGN E DESENVOLVIMENTO POR <a href="https://www.youtube.com/@CaOK_PaiN" target="_blank" style="text-decoration: none; color: inherit;"><b>[CAOK] PAIN</b></a></span>
+    <br><span>Versão 1.2</span>
+</div>
 
 <script>
 /* ══════════════════════════════════════════
@@ -312,19 +317,25 @@ function buildLayout(L){
   var cW = totalPicks <= 6 ? 165 : totalPicks <= 10 ? 140 : 115;
   var cH = Math.round(cW * 1.95);
 
+  // HOST block (alinha à direita — espelho)
+  var hostPicks=document.createElement('div'); hostPicks.className='picks-host';
   for(var i=0;i<L.hP;i++){
     var s=document.createElement('div');
     s.className='gslot'; s.id='hp_'+i;
     s.style.cssText='width:'+cW+'px;height:'+cH+'px;';
-    pr.appendChild(s);
+    hostPicks.appendChild(s);
   }
+  pr.appendChild(hostPicks);
   var sep=document.createElement('div'); sep.className='gsep'; pr.appendChild(sep);
+  // GUEST block (alinha à esquerda — normal)
+  var guestPicks=document.createElement('div'); guestPicks.className='picks-guest';
   for(var j=0;j<L.gP;j++){
     var s2=document.createElement('div');
     s2.className='gslot'; s2.id='gp_'+j;
     s2.style.cssText='width:'+cW+'px;height:'+cH+'px;';
-    pr.appendChild(s2);
+    guestPicks.appendChild(s2);
   }
+  pr.appendChild(guestPicks);
   L._hPTotal = L.hP;
   document.getElementById('lbl-picks').style.display = totalPicks>0?'block':'none';
 
