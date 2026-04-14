@@ -145,11 +145,13 @@ html,body{background:var(--bg);color:#e8e0d0;font-family:var(--FB);min-height:10
     <!-- URLs -->
     <div class="url-row">
       <span class="url-label">🗡️ URL Gods</span>
-      <input type="text" id="urlGods" class="url-input" placeholder="https://aoe2cm.net/api/draft/XXXXX">
+      <span style="font-family:monospace;font-size:11px;color:#555;white-space:nowrap;padding:6px 6px 6px 10px;background:#000;border:1px solid #333;border-right:none;border-radius:3px 0 0 3px;">https://aoe2cm.net/api/draft/</span>
+      <input type="text" id="urlGods" class="url-input" placeholder="NRdfe" style="border-left:none;border-radius:0 3px 3px 0;min-width:80px;flex:0 1 120px;">
     </div>
     <div class="url-row">
       <span class="url-label">🗺️ URL Maps</span>
-      <input type="text" id="urlMaps" class="url-input" placeholder="https://aoe2cm.net/api/draft/XXXXX">
+      <span style="font-family:monospace;font-size:11px;color:#555;white-space:nowrap;padding:6px 6px 6px 10px;background:#000;border:1px solid #333;border-right:none;border-radius:3px 0 0 3px;">https://aoe2cm.net/api/draft/</span>
+      <input type="text" id="urlMaps" class="url-input" placeholder="GhvlN" style="border-left:none;border-radius:0 3px 3px 0;min-width:80px;flex:0 1 120px;">
     </div>
     <textarea id="manualGods" style="display:none;"></textarea>
     <textarea id="manualMaps" style="display:none;"></textarea>
@@ -513,8 +515,11 @@ async function initDraft(){
   SC = {hP:0,gP:0,hB:0,gB:0,hMB:0,gMB:0,hM:0,gM:0,adm:0};
   curEvIdx = 0;
 
-  var urlG = document.getElementById('urlGods').value.trim();
-  var urlM = document.getElementById('urlMaps').value.trim();
+  var BASE = 'https://aoe2cm.net/api/draft/';
+  var codeG = document.getElementById('urlGods').value.trim();
+  var codeM = document.getElementById('urlMaps').value.trim();
+  var urlG = codeG ? BASE + codeG : '';
+  var urlM = codeM ? BASE + codeM : '';
   var rawG = document.getElementById('manualGods').value.trim();
   var rawM = document.getElementById('manualMaps').value.trim();
 
