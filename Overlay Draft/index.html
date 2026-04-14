@@ -198,10 +198,7 @@ html,body{background:var(--bg);color:#e8e0d0;font-family:var(--FB);min-height:10
   <div class="igsec"><h3>Mapas</h3><div class="iggrid" id="map-grid"></div></div>
 </div>
 
-<div class="ftr" style="position: fixed; bottom: 10px; left: 10px; z-index: 1000; opacity: 0.5; font-family: var(--FT); font-size: 11px; text-align: left;">
-    <span>DESIGN E DESENVOLVIMENTO POR <a href="https://www.youtube.com/@CaOK_PaiN" target="_blank" style="text-decoration: none; color: inherit;"><b>[CAOK] PAIN</b></a></span>
-    <br><span>Versão 1.2</span>
-</div>
+<div style="position:fixed;bottom:8px;right:10px;opacity:.2;font-family:var(--FT);font-size:10px;">DESENVOLVIDO POR [CAOK] PAIN</div>
 
 <script>
 /* ══════════════════════════════════════════
@@ -228,7 +225,7 @@ var GOD_NAMES  = {};   // norm(id) → display name
 var MAP_NAMES  = {};   // norm(id) → display name
 
 // Contadores de progresso
-var SC = {hP:0,gP:0,hB:0,gB:0,hMB:0,gMB:0,hM:0,gM:0,adm:0};
+var SC = {hP:0,gP:0,hB:0,gB:0,hMB:0,gMB:0,hM:0,gM:0,adm:0,_hPTotal:0};
 
 /* ══════════════════════════════════════════
    UTILITÁRIOS
@@ -328,6 +325,7 @@ function buildLayout(L){
     s2.style.cssText='width:'+cW+'px;height:'+cH+'px;';
     pr.appendChild(s2);
   }
+  L._hPTotal = L.hP;
   document.getElementById('lbl-picks').style.display = totalPicks>0?'block':'none';
 
   // ── Bans (gods + maps numa linha) ──
@@ -389,8 +387,8 @@ function buildLayout(L){
   mr.innerHTML='';
   var totalMaps = L.hM + L.gM + (L.hasAdmin?1:0);
   var mW = totalMaps<=3 ? 155 : totalMaps<=5 ? 130 : 110;
-  var mH = Math.round(mW*0.75);
-  var mWA= Math.round(mW*1.18); var mHA=Math.round(mH*1.18);
+  var mH = mW; // 1:1 square
+  var mWA= Math.round(mW*1.18); var mHA=mWA; // admin also square
 
   // Host maps (exibidos em ordem reversa para ficarem à esquerda do admin)
   var hmCells=[];
@@ -440,7 +438,7 @@ function processNextEvent(){
   var targetId = null;
   if(act === 'pick'){
     if(tp === 'god'){
-      targetId = (isH?'hp_':'gp_') + SC[isH?'hP':'gP'];
+      targetId = isH ? 'hp_'+(SC._hPTotal-1-SC.hP) : 'gp_'+SC.gP;
     } else {
       if(isAdmin) targetId = 'adm';
       else targetId = (isH?'hm_':'gm_') + SC[isH?'hM':'gM'];
@@ -475,7 +473,8 @@ function revealCard(ev, act, tp, isH, isAdmin, pN, tEl){
 
   if(act === 'pick'){
     if(tp === 'god'){
-      var el = document.getElementById((isH?'hp_':'gp_')+SC[isH?'hP':'gP']);
+      var slotIdx = isH ? (SC._hPTotal - 1 - SC.hP) : SC.gP;
+      var el = document.getElementById((isH?'hp_':'gp_')+slotIdx);
       if(el){ el.innerHTML = imgH+'<div class="gbar">'+name.toUpperCase()+'</div>'; el.classList.add('reveal'); }
       SC[isH?'hP':'gP']++;
     } else {
@@ -515,7 +514,7 @@ function addLog(isH, isAdmin, pN, txt, cls){
 ══════════════════════════════════════════ */
 async function initDraft(){
   timerIds.forEach(id=>clearTimeout(id)); timerIds=[];
-  SC = {hP:0,gP:0,hB:0,gB:0,hMB:0,gMB:0,hM:0,gM:0,adm:0};
+  SC = {hP:0,gP:0,hB:0,gB:0,hMB:0,gMB:0,hM:0,gM:0,adm:0,_hPTotal:0};
   curEvIdx = 0;
 
   var BASE = 'https://aoe2cm.net/api/draft/';
@@ -555,6 +554,9 @@ async function initDraft(){
   var L = analyseLayout(evGods, evMaps);
   buildLayout(L);
 
+  // Copia total de picks HOST para SC (usado no preenchimento reverso)
+  SC._hPTotal = L.hP;
+
   // Ordena todos os eventos por offset (tempo real do draft)
   simEvents = evGods.concat(evMaps);
   simEvents.sort(function(a,b){ return (a.offset||0)-(b.offset||0); });
@@ -571,7 +573,7 @@ async function initDraft(){
 ══════════════════════════════════════════ */
 function resetAll(){
   timerIds.forEach(id=>clearTimeout(id)); timerIds=[];
-  SC={hP:0,gP:0,hB:0,gB:0,hMB:0,gMB:0,hM:0,gM:0,adm:0};
+  SC={hP:0,gP:0,hB:0,gB:0,hMB:0,gMB:0,hM:0,gM:0,adm:0,_hPTotal:0};
   curEvIdx=0; simEvents=[];
   document.getElementById('picks-row').innerHTML='';
   document.getElementById('bans-master').innerHTML='';
