@@ -151,7 +151,14 @@ html,body{background:var(--bg);color:#e8e0d0;font-family:var(--FB);min-height:10
       <span class="url-label">🗺️ URL Maps</span>
       <input type="text" id="urlMaps" class="url-input" placeholder="https://aoe2cm.net/api/draft/XXXXX">
     </div>
-   </div>
+    <!-- JSON direto -->
+
+    <div style="display:flex;align-items:center;gap:10px;">
+      <button class="btn-load" onclick="initDraft()">▶ Iniciar Draft</button>
+      <button class="btn-reset" onclick="resetAll()">🔄 Resetar</button>
+    </div>
+  </div>
+</div>
 
 <!-- ══ OVERLAY ══ -->
 <div id="page-overlay">
@@ -183,12 +190,19 @@ html,body{background:var(--bg);color:#e8e0d0;font-family:var(--FB);min-height:10
 
 <!-- ══ IMAGES PAGE ══ -->
 <div id="page-images" class="imgpg">
+  <div class="portability-box">
+    <div style="flex:1"><strong style="color:var(--gold)">PORTABILIDADE DE LINKS</strong><br><small>Exporte/importe suas URLs entre PCs.</small></div>
+    <button class="port-btn btn-exp" onclick="exportLinks()">📥 Exportar</button>
+    <button class="port-btn btn-imp" onclick="document.getElementById('fileInput').click()">📤 Importar</button>
+    <input type="file" id="fileInput" style="display:none" accept=".json" onchange="importLinks(event)">
+    <button class="port-btn" style="background:#555;color:#fff" onclick="clearCache()">Resetar Links</button>
+  </div>
   <div class="igsec"><h3>Deuses</h3><div class="iggrid" id="god-grid"></div></div>
   <div class="igsec"><h3>Mapas</h3><div class="iggrid" id="map-grid"></div></div>
 </div>
 
 <div class="ftr" style="position: fixed; bottom: 10px; left: 10px; z-index: 1000; opacity: 0.5; font-family: var(--FT); font-size: 11px; text-align: left;">
-    <span>DESIGN E DESENVOLVIMENTO POR <a href="https://www.youtube.com/@CaOK_PaiN" target="_blank" style="text-decoration: none; color: inherit;"><b>[CAOK] PAIN</b></a></span>
+    <span>DESENVOLVIDO POR <a href="https://www.youtube.com/@CaOK_PaiN" target="_blank" style="text-decoration: none; color: inherit;"><b>[CAOK] PAIN</b></a></span>
     <br><span>Versão 1.2</span>
 </div>
 
